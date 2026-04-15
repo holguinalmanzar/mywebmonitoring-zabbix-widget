@@ -254,6 +254,12 @@ class WidgetView extends CControllerDashboardWidgetView {
 					}
 				}
 
+				// If the HTTP code is non-2xx, override status to 'failed'
+				// regardless of lastfailedstep (e.g. scenario has no required-code check).
+				if ($status === 'ok' && $http_code !== null && ($http_code < 200 || $http_code >= 300)) {
+					$status = 'failed';
+				}
+
 				$tests[$httptestid] = $test + [
 					'status'         => $status,
 					'lastcheck'      => ($last !== null) ? ($last['lastcheck'] ?? null) : null,
