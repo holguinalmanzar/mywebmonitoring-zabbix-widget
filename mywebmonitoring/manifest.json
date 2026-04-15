@@ -5,7 +5,7 @@
 	"name": "My Web Monitoring",
 	"namespace": "Mywebmonitoring",
 	"version": "1.0",
-	"author": "Alexander Almanzar)",
+	"author": "Alexander Almanzar",
 	"description": "Displays the status summary of the active web monitoring scenarios.",
 	"url": "web_interface/frontend_sections/dashboards/widgets/web_monitoring",
 	"widget": {
@@ -37,6 +37,7 @@
 		}
 	},
 	"assets": {
-		"js": ["class.widget.js"]
+		"js": ["class.widget.js"],
+		"css": ["widget.css"]
 	}
 }

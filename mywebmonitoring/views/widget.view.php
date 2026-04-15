@@ -21,7 +21,7 @@
  * @var array $data
  */
 
-$table = new CTableInfo();
+$table = (new CTableInfo())->addClass('mywebmonitoring-widget-table');
 
 if ($data['error'] !== null) {
 	$table->setNoDataMessage($data['error']);
@@ -97,15 +97,23 @@ else {
 			$http_code_cell = (new CSpan('—'))->addClass(ZBX_STYLE_GREY);
 		}
 
+		$row_cells = [
+			new CCol($name_cell),
+			new CCol($test['host_name']),
+			new CCol($status_cell),
+			new CCol($response_cell),
+			new CCol($lastcheck_cell),
+			new CCol($http_code_cell)
+		];
+
+		if ($test['status'] === 'failed') {
+			foreach ($row_cells as $ccol) {
+				$ccol->addClass(ZBX_STYLE_AVERAGE_BG);
+			}
+		}
+
 		$table->addRow(
-			(new CRow([
-				$name_cell,
-				$test['host_name'],
-				$status_cell,
-				$response_cell,
-				$lastcheck_cell,
-				$http_code_cell
-			]))->setAttribute('data-hostgroupid', $test['groupid'])
+			(new CRow($row_cells))->setAttribute('data-hostgroupid', $test['groupid'])
 		);
 	}
 }

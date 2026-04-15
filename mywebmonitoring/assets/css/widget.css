@@ -1,0 +1,7 @@
+/*
+ * Zabbix core .average-bg on td only sets text color; .log-average-bg carries the fill.
+ * Scope to this widget table so the failed row gets the standard Average severity orange fill.
+ */
+.mywebmonitoring-widget-table.list-table td.average-bg {
+	background-color: #ffa059;
+}
