@@ -23,7 +23,14 @@ class CWidgetMyWebMonitoring extends CWidget {
 	#table_body = null;
 
 	/**
-	 * ID of selected host group.
+	 * Selected web scenario id (unique per row). Used only for row highlight — many rows can share the same host group.
+	 *
+	 * @type {string|null}
+	 */
+	#selected_httptestid = null;
+
+	/**
+	 * Selected host group id for dashboard broadcast (can match multiple rows).
 	 *
 	 * @type {string|null}
 	 */
@@ -38,45 +45,61 @@ class CWidgetMyWebMonitoring extends CWidget {
 			return;
 		}
 
-		this.#table_body.addEventListener('click', e => this.#onTableBodyClick(e));
+		// Bind once per tbody DOM node (tbody is replaced on each refresh; class-level flags would skip the new node).
+		if (this.#table_body.dataset.mywebmonitoringClickBound !== '1') {
+			this.#table_body.dataset.mywebmonitoringClickBound = '1';
+			this.#table_body.addEventListener('click', e => this.#onTableBodyClick(e));
+		}
 
 		if (!this.hasEverUpdated() && this.isReferred()) {
-			this.#selected_hostgroupid = this.#getDefaultSelectable();
+			const sel = this.#getDefaultSelectable();
 
-			if (this.#selected_hostgroupid !== null) {
-				this.#selectHostGroup();
+			if (sel !== null) {
+				this.#selected_httptestid = String(sel.httptestid);
+				this.#selected_hostgroupid = sel.hostgroupid;
+				this.#selectRow();
 				this.#broadcast();
 			}
 		}
-		else if (this.#selected_hostgroupid !== null) {
-			this.#selectHostGroup();
+		else if (this.#selected_httptestid !== null) {
+			this.#selectRow();
 		}
 	}
 
 	onReferredUpdate() {
-		if (this.#table_body === null || this.#selected_hostgroupid !== null) {
+		if (this.#table_body === null || this.#selected_httptestid !== null) {
 			return;
 		}
 
-		this.#selected_hostgroupid = this.#getDefaultSelectable();
+		const sel = this.#getDefaultSelectable();
 
-		if (this.#selected_hostgroupid !== null) {
-			this.#selectHostGroup();
+		if (sel !== null) {
+			this.#selected_httptestid = String(sel.httptestid);
+			this.#selected_hostgroupid = sel.hostgroupid;
+			this.#selectRow();
 			this.#broadcast();
 		}
 	}
 
 	#getDefaultSelectable() {
-		const row = this.#table_body.querySelector('[data-hostgroupid]');
+		const row = this.#table_body.querySelector('[data-httptestid]');
 
-		return row !== null ? row.dataset.hostgroupid : null;
+		if (row === null) {
+			return null;
+		}
+
+		return {
+			httptestid: String(row.dataset.httptestid),
+			hostgroupid: row.dataset.hostgroupid
+		};
 	}
 
-	#selectHostGroup() {
-		const rows = this.#table_body.querySelectorAll('[data-hostgroupid]');
+	#selectRow() {
+		const selected = this.#selected_httptestid !== null ? String(this.#selected_httptestid) : null;
+		const rows = this.#table_body.querySelectorAll('[data-httptestid]');
 
 		for (const row of rows) {
-			row.classList.toggle(ZBX_STYLE_ROW_SELECTED, row.dataset.hostgroupid === this.#selected_hostgroupid);
+			row.classList.toggle(ZBX_STYLE_ROW_SELECTED, String(row.dataset.httptestid) === selected);
 		}
 	}
 
@@ -92,12 +115,13 @@ class CWidgetMyWebMonitoring extends CWidget {
 			return;
 		}
 
-		const row = e.target.closest('[data-hostgroupid]');
+		const row = e.target.closest('[data-httptestid]');
 
 		if (row !== null) {
+			this.#selected_httptestid = String(row.dataset.httptestid);
 			this.#selected_hostgroupid = row.dataset.hostgroupid;
 
-			this.#selectHostGroup();
+			this.#selectRow();
 			this.#broadcast();
 		}
 	}

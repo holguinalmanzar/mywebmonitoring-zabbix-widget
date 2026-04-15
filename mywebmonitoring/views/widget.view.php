@@ -113,7 +113,9 @@ else {
 		}
 
 		$table->addRow(
-			(new CRow($row_cells))->setAttribute('data-hostgroupid', $test['groupid'])
+			(new CRow($row_cells))
+				->setAttribute('data-hostgroupid', $test['groupid'])
+				->setAttribute('data-httptestid', (string) $test['httptestid'])
 		);
 	}
 }

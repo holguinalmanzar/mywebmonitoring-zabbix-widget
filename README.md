@@ -73,7 +73,7 @@ Data respects Zabbix user permissions.
 | Last check | Timestamp of last check; em dash if not applicable. |
 | HTTP code | Latest HTTP response code; red if outside the 2xx range. |
 
-**Dashboard:** clicking a row (not links or hintboxes) highlights the row and the widget **broadcasts** `_hostgroupid` / `_hostgroupids` for other widgets that consume that data. It can accept incoming filters via `_hostids` and `_groupids` per the manifest.
+**Dashboard:** clicking a row (not links or hintboxes) selects **that scenario only**: Zabbix marks the row with the standard yellow selection style. Other widgets on the dashboard still receive the scenario’s **host group** via `_hostgroupid` / `_hostgroupids` (several scenarios can share the same group). Incoming filters via `_hostids` and `_groupids` are supported per the manifest.
 
 Data uses the Zabbix API, SQL against `httptest` / `hosts_groups` and `httpstepitem` / `httpstep` (per-step response time and HTTP code), plus `Manager::HttpTest()` / `Manager::History()` for last values, matching how the server stores web checks since Zabbix 6.0+.
 
