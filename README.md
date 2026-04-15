@@ -69,7 +69,7 @@ Data respects Zabbix user permissions.
 
 **Dashboard:** clicking a row (not links or hintboxes) highlights the row and the widget **broadcasts** `_hostgroupid` / `_hostgroupids` for other widgets that consume that data. It can accept incoming filters via `_hostids` and `_groupids` per the manifest.
 
-Data uses the Zabbix API, queries against `httptest` / `httptestitem`, and `Manager::HttpTest()` / `Manager::History()` to align with Zabbix’s internal behaviour.
+Data uses the Zabbix API, SQL against `httptest` / `hosts_groups` and `httpstepitem` / `httpstep` (per-step response time and HTTP code), plus `Manager::HttpTest()` / `Manager::History()` for last values, matching how the server stores web checks since Zabbix 6.0+.
 
 ## Module layout
 

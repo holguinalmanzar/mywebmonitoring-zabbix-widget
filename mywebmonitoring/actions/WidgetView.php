@@ -145,24 +145,37 @@ class WidgetView extends CControllerDashboardWidgetView {
 			// Fetch HTTP test execution data (lastcheck, lastfailedstep, error).
 			$httptest_data = $httptestids ? Manager::HttpTest()->getLastData($httptestids) : [];
 
-			// Fetch item IDs for response time and HTTP response code.
-			// In Zabbix 7.0 the constants are HTTPSTEP_ITEM_TYPE_TIME (1) and HTTPSTEP_ITEM_TYPE_RSPCODE (0).
-			$httptest_items = [];
+			// Step-level RSPCODE/TIME items live in httpstepitem → httpstep (Zabbix 6.0+).
+			// httptestitem only links scenario-level items (LASTSTEP, LASTERROR, scenario IN), not per-step time/code.
+			// Several steps ⇒ multiple itemids per scenario per type; pick the value with the newest history clock.
+			$httptest_items_by_type = [];
 			$all_history_items = [];
 
 			if ($httptestids) {
 				$item_rows = DbFetchArray(DBselect(
-					'SELECT hti.itemid,hti.httptestid,hti.type,i.value_type' .
-					' FROM httptestitem hti,items i' .
-					' WHERE hti.itemid=i.itemid' .
-					' AND ' . dbConditionInt('hti.httptestid', $httptestids) .
-					' AND ' . dbConditionInt('hti.type', [HTTPSTEP_ITEM_TYPE_TIME, HTTPSTEP_ITEM_TYPE_RSPCODE])
+					'SELECT hsi.itemid,hs.httptestid,hsi.type,i.value_type' .
+					' FROM httpstepitem hsi,httpstep hs,items i' .
+					' WHERE hsi.httpstepid=hs.httpstepid' .
+					' AND hsi.itemid=i.itemid' .
+					' AND ' . dbConditionInt('hs.httptestid', $httptestids) .
+					' AND ' . dbConditionInt('hsi.type', [HTTPSTEP_ITEM_TYPE_TIME, HTTPSTEP_ITEM_TYPE_RSPCODE])
 				));
 
 				foreach ($item_rows as $item_row) {
-					$httptest_items[$item_row['httptestid']][$item_row['type']] = $item_row['itemid'];
-					$all_history_items[$item_row['itemid']] = [
-						'itemid'     => $item_row['itemid'],
+					$hid = $item_row['httptestid'];
+					$typ = (int) $item_row['type'];
+					$iid = $item_row['itemid'];
+
+					if (!array_key_exists($hid, $httptest_items_by_type)) {
+						$httptest_items_by_type[$hid] = [];
+					}
+					if (!array_key_exists($typ, $httptest_items_by_type[$hid])) {
+						$httptest_items_by_type[$hid][$typ] = [];
+					}
+					$httptest_items_by_type[$hid][$typ][] = $iid;
+
+					$all_history_items[$iid] = [
+						'itemid'     => $iid,
 						'value_type' => $item_row['value_type']
 					];
 				}
@@ -178,6 +191,33 @@ class WidgetView extends CControllerDashboardWidgetView {
 				);
 			}
 
+			$pick_latest_item_value = static function (array $candidate_itemids, array $item_history) {
+				$best_clock = null;
+				$best = null;
+
+				foreach ($candidate_itemids as $iid) {
+					$row = null;
+					foreach ([$iid, (string) $iid, (int) $iid] as $key) {
+						if (isset($item_history[$key][0])) {
+							$row = $item_history[$key][0];
+							break;
+						}
+					}
+					if ($row === null) {
+						continue;
+					}
+
+					$clock = (int) ($row['clock'] ?? 0);
+
+					if ($best_clock === null || $clock >= $best_clock) {
+						$best_clock = $clock;
+						$best = $row['value'];
+					}
+				}
+
+				return $best;
+			};
+
 			// Build the final tests array with all display data.
 			$tests = [];
 			foreach ($tests_by_id as $httptestid => $test) {
@@ -191,20 +231,26 @@ class WidgetView extends CControllerDashboardWidgetView {
 				}
 
 				$response_time = null;
-				if (array_key_exists($httptestid, $httptest_items)
-						&& array_key_exists(HTTPSTEP_ITEM_TYPE_TIME, $httptest_items[$httptestid])) {
-					$time_itemid = $httptest_items[$httptestid][HTTPSTEP_ITEM_TYPE_TIME];
-					if (array_key_exists($time_itemid, $item_history) && $item_history[$time_itemid]) {
-						$response_time = (float) $item_history[$time_itemid][0]['value'];
+				if (array_key_exists($httptestid, $httptest_items_by_type)
+						&& array_key_exists(HTTPSTEP_ITEM_TYPE_TIME, $httptest_items_by_type[$httptestid])) {
+					$raw = $pick_latest_item_value(
+						$httptest_items_by_type[$httptestid][HTTPSTEP_ITEM_TYPE_TIME],
+						$item_history
+					);
+					if ($raw !== null && is_numeric($raw)) {
+						$response_time = (float) $raw;
 					}
 				}
 
 				$http_code = null;
-				if (array_key_exists($httptestid, $httptest_items)
-						&& array_key_exists(HTTPSTEP_ITEM_TYPE_RSPCODE, $httptest_items[$httptestid])) {
-					$code_itemid = $httptest_items[$httptestid][HTTPSTEP_ITEM_TYPE_RSPCODE];
-					if (array_key_exists($code_itemid, $item_history) && $item_history[$code_itemid]) {
-						$http_code = (int) $item_history[$code_itemid][0]['value'];
+				if (array_key_exists($httptestid, $httptest_items_by_type)
+						&& array_key_exists(HTTPSTEP_ITEM_TYPE_RSPCODE, $httptest_items_by_type[$httptestid])) {
+					$raw = $pick_latest_item_value(
+						$httptest_items_by_type[$httptestid][HTTPSTEP_ITEM_TYPE_RSPCODE],
+						$item_history
+					);
+					if ($raw !== null && is_numeric($raw)) {
+						$http_code = (int) $raw;
 					}
 				}
 

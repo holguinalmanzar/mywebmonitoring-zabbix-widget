@@ -5,7 +5,7 @@
 	"name": "My Web Monitoring",
 	"namespace": "Mywebmonitoring",
 	"version": "1.0",
-	"author": "Alexander Almanzar (módulo derivado; widget base y copyright © Zabbix SIA, AGPL-3.0)",
+	"author": "Alexander Almanzar)",
 	"description": "Displays the status summary of the active web monitoring scenarios.",
 	"url": "web_interface/frontend_sections/dashboards/widgets/web_monitoring",
 	"widget": {
