@@ -6,6 +6,45 @@ The module id is **`mywebmonitoring`**. Only the **`mywebmonitoring/`** folder i
 
 **Provenance:** this module is based on Zabbix’s **web monitoring** dashboard widget and extends it. Original code and copyright notices remain with **Zabbix SIA** under **AGPL-3.0**. Distribution and maintenance of this extended version are by **Alexander Almanzar** (see `author` in `manifest.json`).
 
+## Community & contributing
+
+If you use this module, feedback is welcome: open an **issue** or **pull request** on GitHub. See [CONTRIBUTING.md](CONTRIBUTING.md) for license notes, how to test changes, and what to include in bug reports.
+
+Broader Zabbix discussions also happen on the [Zabbix forum](https://www.zabbix.com/forum) and the [official documentation](https://www.zabbix.com/documentation).
+
+### Maintainer: GitHub “About”, topics, and first release
+
+Use these when you publish the repository (copy-paste as needed).
+
+**Repository description** (short “About” field):
+
+```text
+Zabbix 7.x UI module: dashboard widget listing web scenarios with HTTP code, response time, last check, status, and host-group broadcast. AGPL-3.0.
+```
+
+**Suggested topics** (add under repository settings → Topics):
+
+`zabbix` `zabbix-widget` `web-monitoring` `dashboard` `php` `monitoring` `agpl-3` `zabbix-module`
+
+**First GitHub Release** — tag: `v1.0.0`, title: `v1.0.0 — initial community release`
+
+Release notes body:
+
+```markdown
+First tagged release of the **My Web Monitoring** dashboard module (`mywebmonitoring`).
+
+**Highlights**
+- Table of active web scenarios: name, host, status, response time, last check, HTTP code
+- Per-step metrics via `httpstepitem` / `httpstep` (Zabbix 6.0+ storage model)
+- Status reflects failed steps and non-2xx HTTP codes; failed rows use Average-severity orange highlight
+- Host group broadcast on row click for linked dashboard widgets
+- Optional filters: host groups, exclude groups, hosts, scenario tags, maintenance
+
+**Install** — copy `mywebmonitoring/` into the Zabbix frontend `modules/` directory, scan modules in the UI, enable the module, add the widget to a dashboard. See [README.md](README.md).
+
+**License** — AGPL-3.0; includes Zabbix SIA copyright on derived frontend code (see repository files).
+```
+
 ## Requirements
 
 - Zabbix **7.0** or compatible (PHP frontend with **UI modules**)
@@ -62,7 +101,7 @@ Data respects Zabbix user permissions.
 |--------|---------|
 | Name | Scenario name; link to *Web monitoring* filtered by group (if the user has `UI_MONITORING_HOSTS`). |
 | Host | Host name for the scenario. |
-| Status | **Ok** (green), **Failed** with failed step when applicable (red), or **Unknown** (grey) from the last run. |
+| Status | **Ok** (green), **Failed** when Zabbix reports a failed step or when the latest HTTP code is **outside 2xx** (red), or **Unknown** (grey). Failed rows use the standard **Average** severity highlight (orange). |
 | Response time | Latest HTTP step time item value in **ms**; em dash if missing. |
 | Last check | Timestamp of last check; em dash if not applicable. |
 | HTTP code | Latest HTTP response code; red if outside the 2xx range. |
@@ -85,12 +124,16 @@ mywebmonitoring/
 │   ├── widget.edit.php        # Configuration dialog
 │   └── widget.view.php        # Table (CTableInfo + CWidgetView)
 └── assets/
-    └── js/class.widget.js     # CWidgetMyWebMonitoring (click + broadcast)
+    ├── js/class.widget.js     # CWidgetMyWebMonitoring (click + broadcast)
+    └── css/widget.css         # Failed-row background (severity orange)
 ```
 
 ## Other files in this repository
 
-- `README.md` (repository root) — this document. There are no other reference artefacts; everything installable lives under `mywebmonitoring/`.
+- `README.md` — this document.
+- `CONTRIBUTING.md` — how to contribute and report issues.
+- `.gitignore` — common local/IDE noise (not required on the server).
+- Everything installable for Zabbix lives under **`mywebmonitoring/`**.
 
 ## License
 
