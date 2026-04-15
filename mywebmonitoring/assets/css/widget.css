@@ -18,12 +18,9 @@
 }
 
 /* Floating action menu (appended to document.body). */
-ul.mywebmon-popup-menu {
+.mywebmon-popup-menu {
 	position: fixed;
 	z-index: 10000;
-	margin: 0;
-	padding: 4px 0;
-	list-style: none;
 	min-width: 12rem;
 	background-color: #ffffff;
 	border: 1px solid #ccd5e0;
@@ -31,7 +28,24 @@ ul.mywebmon-popup-menu {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-ul.mywebmon-popup-menu li a {
+.mywebmon-popup-menu__header {
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #76808a;
+	padding: 8px 14px 6px;
+	border-bottom: 1px solid #e9ebed;
+	margin-bottom: 2px;
+}
+
+.mywebmon-popup-menu__list {
+	margin: 0;
+	padding: 0 0 4px;
+	list-style: none;
+}
+
+.mywebmon-popup-menu__list li a {
 	display: block;
 	padding: 6px 14px;
 	color: #1f2c34;
@@ -39,7 +53,7 @@ ul.mywebmon-popup-menu li a {
 	white-space: nowrap;
 }
 
-ul.mywebmon-popup-menu li a:hover {
+.mywebmon-popup-menu__list li a:hover {
 	background-color: #e8f4ff;
 	text-decoration: none;
 }

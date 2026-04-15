@@ -175,8 +175,16 @@ class CWidgetMyWebMonitoring extends CWidget {
 			return;
 		}
 
+		const menu = document.createElement('div');
+		menu.className = 'mywebmon-popup-menu';
+
+		const header = document.createElement('div');
+		header.className = 'mywebmon-popup-menu__header';
+		header.textContent = t('Actions');
+		menu.appendChild(header);
+
 		const ul = document.createElement('ul');
-		ul.className = 'mywebmon-popup-menu';
+		ul.className = 'mywebmon-popup-menu__list';
 
 		if (webmonUrl) {
 			const li = document.createElement('li');
@@ -198,8 +206,10 @@ class CWidgetMyWebMonitoring extends CWidget {
 			ul.appendChild(li);
 		}
 
-		document.body.appendChild(ul);
-		this.#actionMenuEl = ul;
+		menu.appendChild(ul);
+
+		document.body.appendChild(menu);
+		this.#actionMenuEl = menu;
 
 		const positionMenu = () => {
 			const anchor = event.target.closest('.mywebmon-name-btn');
@@ -207,24 +217,24 @@ class CWidgetMyWebMonitoring extends CWidget {
 			let left = r ? r.left : event.clientX;
 			let top = r ? r.bottom + 4 : event.clientY;
 
-			const w = ul.offsetWidth;
-			const h = ul.offsetHeight;
+			const w = menu.offsetWidth;
+			const h = menu.offsetHeight;
 
 			left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
 			top = Math.max(8, Math.min(top, window.innerHeight - h - 8));
 
-			ul.style.left = `${left}px`;
-			ul.style.top = `${top}px`;
+			menu.style.left = `${left}px`;
+			menu.style.top = `${top}px`;
 		};
 
-		ul.style.visibility = 'hidden';
+		menu.style.visibility = 'hidden';
 		requestAnimationFrame(() => {
 			positionMenu();
-			ul.style.visibility = '';
+			menu.style.visibility = '';
 		});
 
 		const onPointerDown = (ev) => {
-			if (ul.contains(ev.target)) {
+			if (menu.contains(ev.target)) {
 				return;
 			}
 
@@ -247,7 +257,7 @@ class CWidgetMyWebMonitoring extends CWidget {
 			document.addEventListener('keydown', onKeyDown, true);
 		}, 0);
 
-		ul.querySelectorAll('a').forEach((a) => {
+		menu.querySelectorAll('a').forEach((a) => {
 			a.addEventListener('click', () => {
 				this.#dismissActionMenu();
 			});
