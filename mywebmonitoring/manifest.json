@@ -4,7 +4,7 @@
 	"type": "widget",
 	"name": "My Web Monitoring",
 	"namespace": "Mywebmonitoring",
-	"version": "1.0",
+	"version": "1.0.1",
 	"author": "Alexander Almanzar",
 	"description": "Displays the status summary of the active web monitoring scenarios.",
 	"url": "https://github.com/holguinalmanzar/mywebmonitoring-zabbix-widget",
