@@ -12,39 +12,6 @@ If you use this module, feedback is welcome: open an **issue** or **pull request
 
 Broader Zabbix discussions also happen on the [Zabbix forum](https://www.zabbix.com/forum) and the [official documentation](https://www.zabbix.com/documentation).
 
-### Maintainer: GitHub “About”, topics, and first release
-
-Use these when you publish the repository (copy-paste as needed).
-
-**Repository description** (short “About” field):
-
-```text
-Zabbix 7.x UI module: dashboard widget listing web scenarios with HTTP code, response time, last check, status, and host-group broadcast. AGPL-3.0.
-```
-
-**Suggested topics** (add under repository settings → Topics):
-
-`zabbix` `zabbix-widget` `web-monitoring` `dashboard` `php` `monitoring` `agpl-3` `zabbix-module`
-
-**First GitHub Release** — tag: `v1.0.0`, title: `v1.0.0 — initial community release`
-
-Release notes body:
-
-```markdown
-First tagged release of the **My Web Monitoring** dashboard module (`mywebmonitoring`).
-
-**Highlights**
-- Table of active web scenarios: name, host, status, response time, last check, HTTP code
-- Per-step metrics via `httpstepitem` / `httpstep` (Zabbix 6.0+ storage model)
-- Status reflects failed steps and non-2xx HTTP codes; failed rows use Average-severity orange highlight
-- Host group broadcast on row click for linked dashboard widgets
-- Optional filters: host groups, exclude groups, hosts, scenario tags, maintenance
-
-**Install** — copy `mywebmonitoring/` into the Zabbix frontend `modules/` directory, scan modules in the UI, enable the module, add the widget to a dashboard. See [README.md](README.md).
-
-**License** — AGPL-3.0; includes Zabbix SIA copyright on derived frontend code (see repository files).
-```
-
 ## Requirements
 
 - Zabbix **7.0** or compatible (PHP frontend with **UI modules**)
@@ -132,6 +99,7 @@ mywebmonitoring/
 
 - `README.md` — this document.
 - `CONTRIBUTING.md` — how to contribute and report issues.
+- `MAINTAINERS.md` — optional publishing/release notes for repository maintainers (not required to use the module).
 - `.gitignore` — common local/IDE noise (not required on the server).
 - Everything installable for Zabbix lives under **`mywebmonitoring/`**.
 
