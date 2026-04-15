@@ -1,6 +1,6 @@
 # My Web Monitoring — Zabbix 7.0 widget
 
-Dashboard widget that summarizes **active web monitoring** (HTTP) scenarios in a **table**: last run status, response time, last check, and HTTP status code. The scenario name can link to the **Web monitoring** view filtered by host group. Clicking a row **broadcasts the associated host group** so other widgets on the same dashboard can react (manifest output data).
+Dashboard widget that summarizes **active web monitoring** (HTTP) scenarios in a **table**: last run status, response time, last check, and HTTP status code. Clicking the **scenario name** opens a small **Actions** menu: **Web monitoring** (same as before: *Web monitoring* filtered by host group, when the user has *Monitoring → Hosts* access) or **Visit site** (opens the first step’s HTTP URL in a new tab). Clicking a row **broadcasts the associated host group** so other widgets on the same dashboard can react (manifest output data).
 
 The module id is **`mywebmonitoring`**. Only the **`mywebmonitoring/`** folder is deployed to Zabbix; this `README.md` lives at the repository root for documentation.
 
@@ -66,16 +66,16 @@ Data respects Zabbix user permissions.
 
 | Column | Content |
 |--------|---------|
-| Name | Scenario name; link to *Web monitoring* filtered by group (if the user has `UI_MONITORING_HOSTS`). |
+| Name | Scenario name; click opens an **Actions** popup with **Web monitoring** (when permitted) and **Visit site** (URL from step 1 of the scenario). |
 | Host | Host name for the scenario. |
 | Status | **Ok** (green), **Failed** when Zabbix reports a failed step or when the latest HTTP code is **outside 2xx** (red), or **Unknown** (grey). Failed rows use the standard **Average** severity highlight (orange). |
 | Response time | Latest HTTP step time item value in **ms**; em dash if missing. |
 | Last check | Timestamp of last check; em dash if not applicable. |
 | HTTP code | Latest HTTP response code; red if outside the 2xx range. |
 
-**Dashboard:** clicking a row (not links or hintboxes) selects **that scenario only**: Zabbix marks the row with the standard yellow selection style. Other widgets on the dashboard still receive the scenario’s **host group** via `_hostgroupid` / `_hostgroupids` (several scenarios can share the same group). Incoming filters via `_hostids` and `_groupids` are supported per the manifest.
+**Dashboard:** clicking a row (not links or hintboxes) selects **that scenario only**: Zabbix marks the row with the standard yellow selection style. Clicking the **name** does the same and also opens the **Actions** menu (dismiss with Escape or a click outside). Other widgets on the dashboard still receive the scenario’s **host group** via `_hostgroupid` / `_hostgroupids` (several scenarios can share the same group). Incoming filters via `_hostids` and `_groupids` are supported per the manifest.
 
-Data uses the Zabbix API, SQL against `httptest` / `hosts_groups` and `httpstepitem` / `httpstep` (per-step response time and HTTP code), plus `Manager::HttpTest()` / `Manager::History()` for last values, matching how the server stores web checks since Zabbix 6.0+.
+Data uses the Zabbix API, SQL against `httptest` / `hosts_groups` and `httpstepitem` / `httpstep` (per-step response time and HTTP code), the first-step URL (`httpstep.url` where `no=1`) for **Visit site**, plus `Manager::HttpTest()` / `Manager::History()` for last values, matching how the server stores web checks since Zabbix 6.0+.
 
 ## Module layout
 
@@ -91,8 +91,8 @@ mywebmonitoring/
 │   ├── widget.edit.php        # Configuration dialog
 │   └── widget.view.php        # Table (CTableInfo + CWidgetView)
 └── assets/
-    ├── js/class.widget.js     # CWidgetMyWebMonitoring (click + broadcast)
-    └── css/widget.css         # Failed-row background (severity orange)
+    ├── js/class.widget.js     # CWidgetMyWebMonitoring (click, broadcast, Actions popup)
+    └── css/widget.css         # Failed-row highlight; name + popup menu styles
 ```
 
 ## Other files in this repository
