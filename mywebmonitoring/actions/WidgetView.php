@@ -181,6 +181,20 @@ class WidgetView extends CControllerDashboardWidgetView {
 				}
 			}
 
+			// First step URL per scenario (for "Visit site" in the name-cell action menu).
+			$step_urls = [];
+			if ($httptestids) {
+				$url_rows = DbFetchArray(DBselect(
+					'SELECT httptestid,url FROM httpstep' .
+					' WHERE ' . dbConditionInt('httptestid', $httptestids) .
+					' AND no=1'
+				));
+
+				foreach ($url_rows as $ur) {
+					$step_urls[$ur['httptestid']] = $ur['url'];
+				}
+			}
+
 			// Fetch last history values using the same Manager::History approach Zabbix uses internally.
 			$item_history = [];
 			if ($all_history_items) {
@@ -266,7 +280,8 @@ class WidgetView extends CControllerDashboardWidgetView {
 					'lastfailedstep' => ($last !== null) ? ($last['lastfailedstep'] ?? null) : null,
 					'error'          => ($last !== null) ? ($last['error'] ?? null) : null,
 					'response_time'  => $response_time,
-					'http_code'      => $http_code
+					'http_code'      => $http_code,
+					'site_url'       => array_key_exists($httptestid, $step_urls) ? $step_urls[$httptestid] : ''
 				];
 			}
 

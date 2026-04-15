@@ -43,14 +43,16 @@ else {
 		: null;
 
 	foreach ($data['tests'] as $test) {
-		// Name cell — link to web monitoring view filtered by host group.
+		// Name cell — clickable label; JS shows action menu (Web monitoring / Visit site).
+		$webmon_url_attr = '';
 		if ($web_url !== null) {
 			$web_url->setArgument('filter_groupids', [$test['groupid']]);
-			$name_cell = new CLink($test['name'], $web_url->getUrl());
+			$webmon_url_attr = $web_url->getUrl();
 		}
-		else {
-			$name_cell = $test['name'];
-		}
+
+		$site_url_attr = array_key_exists('site_url', $test) ? $test['site_url'] : '';
+
+		$name_cell = (new CSpan($test['name']))->addClass('mywebmon-name-btn');
 
 		// Status cell.
 		switch ($test['status']) {
@@ -116,6 +118,8 @@ else {
 			(new CRow($row_cells))
 				->setAttribute('data-hostgroupid', $test['groupid'])
 				->setAttribute('data-httptestid', (string) $test['httptestid'])
+				->setAttribute('data-webmon-url', $webmon_url_attr)
+				->setAttribute('data-site-url', $site_url_attr)
 		);
 	}
 }

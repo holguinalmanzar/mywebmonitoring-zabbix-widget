@@ -36,6 +36,20 @@ class CWidgetMyWebMonitoring extends CWidget {
 	 */
 	#selected_hostgroupid = null;
 
+	/**
+	 * Action menu DOM node (name cell: Web monitoring / Visit site).
+	 *
+	 * @type {HTMLElement|null}
+	 */
+	#actionMenuEl = null;
+
+	/**
+	 * Removes document listeners registered for the current action menu.
+	 *
+	 * @type {(() => void)|null}
+	 */
+	#actionMenuCleanup = null;
+
 	setContents(response) {
 		super.setContents(response);
 
@@ -44,6 +58,8 @@ class CWidgetMyWebMonitoring extends CWidget {
 		if (this.#table_body == null) {
 			return;
 		}
+
+		this.#dismissActionMenu();
 
 		// Bind once per tbody DOM node (tbody is replaced on each refresh; class-level flags would skip the new node).
 		if (this.#table_body.dataset.mywebmonitoringClickBound !== '1') {
@@ -117,12 +133,124 @@ class CWidgetMyWebMonitoring extends CWidget {
 
 		const row = e.target.closest('[data-httptestid]');
 
-		if (row !== null) {
-			this.#selected_httptestid = String(row.dataset.httptestid);
-			this.#selected_hostgroupid = row.dataset.hostgroupid;
-
-			this.#selectRow();
-			this.#broadcast();
+		if (row === null) {
+			return;
 		}
+
+		this.#selected_httptestid = String(row.dataset.httptestid);
+		this.#selected_hostgroupid = row.dataset.hostgroupid;
+
+		this.#selectRow();
+		this.#broadcast();
+
+		if (e.target.closest('.mywebmon-name-btn') !== null) {
+			this.#showActionMenu(e, row);
+		}
+	}
+
+	#dismissActionMenu() {
+		if (this.#actionMenuCleanup !== null) {
+			this.#actionMenuCleanup();
+			this.#actionMenuCleanup = null;
+		}
+
+		if (this.#actionMenuEl !== null && this.#actionMenuEl.parentNode) {
+			this.#actionMenuEl.remove();
+		}
+
+		this.#actionMenuEl = null;
+	}
+
+	/**
+	 * @param {MouseEvent} event
+	 * @param {HTMLElement} row
+	 */
+	#showActionMenu(event, row) {
+		this.#dismissActionMenu();
+
+		const webmonUrl = row.dataset.webmonUrl || '';
+		const siteUrl = row.dataset.siteUrl || '';
+
+		if (!webmonUrl && !siteUrl) {
+			return;
+		}
+
+		const ul = document.createElement('ul');
+		ul.className = 'mywebmon-popup-menu';
+
+		if (webmonUrl) {
+			const li = document.createElement('li');
+			const a = document.createElement('a');
+			a.href = webmonUrl;
+			a.textContent = t('Web monitoring');
+			li.appendChild(a);
+			ul.appendChild(li);
+		}
+
+		if (siteUrl) {
+			const li = document.createElement('li');
+			const a = document.createElement('a');
+			a.href = siteUrl;
+			a.target = '_blank';
+			a.rel = 'noopener noreferrer';
+			a.textContent = t('Visit site');
+			li.appendChild(a);
+			ul.appendChild(li);
+		}
+
+		document.body.appendChild(ul);
+		this.#actionMenuEl = ul;
+
+		const positionMenu = () => {
+			const anchor = event.target.closest('.mywebmon-name-btn');
+			const r = anchor ? anchor.getBoundingClientRect() : null;
+			let left = r ? r.left : event.clientX;
+			let top = r ? r.bottom + 4 : event.clientY;
+
+			const w = ul.offsetWidth;
+			const h = ul.offsetHeight;
+
+			left = Math.max(8, Math.min(left, window.innerWidth - w - 8));
+			top = Math.max(8, Math.min(top, window.innerHeight - h - 8));
+
+			ul.style.left = `${left}px`;
+			ul.style.top = `${top}px`;
+		};
+
+		ul.style.visibility = 'hidden';
+		requestAnimationFrame(() => {
+			positionMenu();
+			ul.style.visibility = '';
+		});
+
+		const onPointerDown = (ev) => {
+			if (ul.contains(ev.target)) {
+				return;
+			}
+
+			this.#dismissActionMenu();
+		};
+
+		const onKeyDown = (ev) => {
+			if (ev.key === 'Escape') {
+				this.#dismissActionMenu();
+			}
+		};
+
+		this.#actionMenuCleanup = () => {
+			document.removeEventListener('pointerdown', onPointerDown, true);
+			document.removeEventListener('keydown', onKeyDown, true);
+		};
+
+		setTimeout(() => {
+			document.addEventListener('pointerdown', onPointerDown, true);
+			document.addEventListener('keydown', onKeyDown, true);
+		}, 0);
+
+		ul.querySelectorAll('a').forEach((a) => {
+			a.addEventListener('click', () => {
+				this.#dismissActionMenu();
+			});
+		});
 	}
 }
